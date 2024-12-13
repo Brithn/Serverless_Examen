@@ -1,0 +1,67 @@
+org: espesd99
+service: BookTables  
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:Scan
+      Resource:
+        - "arn:aws:dynamodb:us-east-1:536697266402:table/BookTables" 
+
+resources:
+  Resources:
+    BookTable:  
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: BookTables  
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: BookID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: BookID
+            KeyType: HASH
+
+functions:
+  createBook:
+    handler: src/createBook.createBook
+    events:
+      - httpApi:
+          path: /books
+          method: post
+
+  getBooks:
+    handler: src/getBooks.getBook
+    events:
+      - httpApi:
+          path: /books
+          method: get
+
+  getBookById:
+    handler: src/getBook.getBookById
+    events:
+      - httpApi:
+          path: /books/{bookId}
+          method: get
+
+  updateBook:
+    handler: src/updateBook.updateBook
+    events:
+      - httpApi:
+          path: /books/{BookID}
+          method: put
+
+  deleteBook:
+    handler: src/deleteBook.deleteBook
+    events:
+      - httpApi:
+          path: /books/{BookID}
+          method: delete
